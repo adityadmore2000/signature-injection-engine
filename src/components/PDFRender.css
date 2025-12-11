@@ -1,7 +1,8 @@
-.pdf-page{
+.pdf-page {
     margin-bottom: 20px;
 }
-.react-pdf__Page__canvas{
-    display:block;
-    margin:0 auto 20px auto;
+
+.react-pdf__Page__canvas {
+    display: block;
+    margin: 0 auto 20px auto;
 }
