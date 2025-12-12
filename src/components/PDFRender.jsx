@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import FieldSidebar from "./PDFRenderer/FieldSidebar"
+import PDFCanvas from "./PDFRenderer/PDFCanvas";
 import { Document, Page, pdfjs } from 'react-pdf';
-import "./PDFRender.css";
-import { useParams } from 'react-router-dom';
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -10,24 +13,26 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 export default function PDFRender() {
     const { id } = useParams();
-    const [numPages, setNumPages] = useState(null);
+    const [pdfUrl, setPdfUrl] = useState(null);
+    const [fields, setFields] = useState([]);
 
-    function onDocumentLoadSuccess({ numPages }) {
-        setNumPages(numPages);
+    useEffect(() => {
+        setPdfUrl(`http://localhost:3000/pdf/${id}`);
+    }, [id]);
+
+    const handleDragStart = (e, type) => {
+        console.log("drag started on ", e.target);
+        e.dataTransfer.setData("fieldType", type);
+    }
+
+    const addField = (field) => {
+        setFields(prev => [...prev, field]);
     }
 
     return (
-        <div>
-            <Document file={`http://localhost:3000/pdf/${id}`} onLoadSuccess={onDocumentLoadSuccess}>
-                {numPages && Array.from(new Array(numPages), (_, index) => (
-                    <div key={index} className="pdf-page">
-                        <Page pageNumber={index + 1} />
-                        <p className='page-number'>
-                            Page {index + 1} of {numPages}
-                        </p>
-                    </div>
-                ))}
-            </Document>
+        <div className="flex h-screen">
+            <FieldSidebar onDragStart={handleDragStart} />
+            <PDFCanvas pdfUrl={pdfUrl} fields={fields} addField={addField} />
         </div>
-    );
+    )
 }
